@@ -1,5 +1,8 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
@@ -37,3 +40,18 @@ class LogoutSerializer(serializers.Serializer):
         return data
 
 
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(min_length=8, write_only=True)
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'password')
+
+    def create(self, validated_data):
+        #create the user with the valid data
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data['email'],
+            password=validated_data['password'],       
+        )
+        return user
